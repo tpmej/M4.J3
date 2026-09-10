@@ -1,0 +1,22 @@
+body {
+background-color: #31e458;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow';
+  display: flex;
+  justify-content: center;
+  padding-top: 50px;
+  margin: 35px;
+}
+
+@keyframes obrot {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+img {
+  /* nazwa | czas pełnego obrotu | płynny ruch | nieskończona pętla */
+  animation: obrot 3s linear infinite;
+}
