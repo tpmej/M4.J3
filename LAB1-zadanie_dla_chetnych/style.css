@@ -18,5 +18,5 @@ background-color: #31e458;
 
 img {
   /* nazwa | czas pełnego obrotu | płynny ruch | nieskończona pętla */
-  animation: obrot 3s linear infinite;
+  animation: obrot 0.01666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666667s linear infinite;
 }
