@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <form action="odbierz.php" method="POST" id="formularz">
+        <h2><code>Formularz kontaktowy</code></h2>
+
+        <p id="powitanie"></p>
+
+        <label for="imie"><code>Imię:</code></label><br>
+        <input type="text" id="imie" name="imie" required>
+        <span id="blad-imie" class="blad"></span>
+        <br><br>
+
+        <label for="wiadomosc"><code>Wiadomość:</code></label><br>
+        <textarea id="wiadomosc" name="wiadomosc" rows="3" maxlength="200" required></textarea>
+        <span id="blad-wiadomosc" class="blad"></span>
+        <br><br>
+        
+        <button type="submit"><code>Wyślij</code></button>
+    </form>
+    <script>
+        const form = document.getElementById('contactForm');
+        const nameInput = document.getElementById('name');
+        form.addEventListener('submit', function(event) {
+            const nameValue = nameInput.value.trim();
+            if (nameInput.value.trim() === '') {
+                alert('Proszę wprowadzić imię.');
+                event.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
