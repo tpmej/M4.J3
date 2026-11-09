@@ -14,7 +14,6 @@
 
         <label for="imie"><code>Imię:</code></label><br>
         <input type="text" id="imie" name="imie" required>
-        <span id="blad-imie" class="blad"></span>
         <br><br>
 
         <label for="wiadomosc"><code>Wiadomość:</code></label><br>
@@ -25,8 +24,8 @@
         <button type="submit"><code>Wyślij</code></button>
     </form>
     <script>
-        const form = document.getElementById('contactForm');
-        const nameInput = document.getElementById('name');
+        const form = document.getElementById('formularz');
+        const nameInput = document.getElementById('imie');
         form.addEventListener('submit', function(event) {
             const nameValue = nameInput.value.trim();
             if (nameInput.value.trim() === '') {
