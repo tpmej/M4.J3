@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Office SPA — System Rezerwacji Stanowisk</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">🏢</div>
+        <div>
+          <h1>Smart Office <span class="badge-spa">SPA</span></h1>
+          <p class="subtitle">System rezerwacji biurek i sal konferencyjnych</p>
+        </div>
+      </div>
+
+      <button type="button" id="theme-toggle" class="btn btn-outline" aria-label="Przełącz motyw kolorystyczny">
+        <span id="theme-icon" aria-hidden="true">🌙</span>
+        <span id="theme-label">Tryb ciemny</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="container main-layout">
+    <section class="card filter-panel" aria-labelledby="filter-heading">
+      <div class="section-header">
+        <h2 id="filter-heading">Wybierz termin rezerwacji</h2>
+        <div class="legend" aria-label="Legenda statusów stanowisk">
+          <span class="legend-item"><i class="dot dot-free"></i> Wolne</span>
+          <span class="legend-item"><i class="dot dot-occupied"></i> Zajęte</span>
+          <span class="legend-item"><i class="dot dot-selected"></i> Wybrane</span>
+        </div>
+      </div>
+
+      <form id="filter-form" class="filter-grid" novalidate>
+        <div class="form-group">
+          <label for="filter-date">Data</label>
+          <input type="date" id="filter-date" name="date" required>
+        </div>
+
+        <div class="form-group">
+          <label for="filter-start">Godzina rozpoczęcia</label>
+          <input type="time" id="filter-start" name="start" step="900" required>
+        </div>
+
+        <div class="form-group">
+          <label for="filter-end">Godzina zakończenia</label>
+          <input type="time" id="filter-end" name="end" step="900" required>
+        </div>
+
+        <div class="form-group filter-actions">
+          <span class="filter-hint" id="filter-status-text">Sprawdzanie dostępności...</span>
+        </div>
+      </form>
+    </section>
+
+    <section id="ics-banner" class="card ics-banner hidden" aria-live="polite">
+      <div class="ics-banner-content">
+        <div>
+          <strong>Rezerwacja zapisana pomyślnie!</strong>
+          <p id="ics-banner-details">Możesz dodać termin bezpośrednio do swojego kalendarza.</p>
+        </div>
+        <div class="ics-banner-actions">
+          <a id="ics-download-link" href="#" class="btn btn-primary" download="rezerwacja.ics">
+            📅 Pobierz plik .ics
+          </a>
+          <button type="button" id="ics-banner-close" class="btn btn-outline">Zamknij</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card floorplan-section" aria-labelledby="map-heading">
+      <div class="section-header">
+        <div>
+          <h2 id="map-heading">Rzut przestrzeni biurowej (Piętro 1)</h2>
+          <p class="section-desc">Kliknij wolne stanowisko lub salę konferencyjną, aby utworzyć rezerwację.</p>
+        </div>
+        <span class="stats-pill" id="availability-counter">Ładowanie...</span>
+      </div>
+
+      <div class="office-blueprint">
+        <div class="zone-label">Strefa konferencyjna i wspólna</div>
+        <div id="office-grid" class="office-grid" role="group" aria-label="Mapa stanowisk biurowych"></div>
+      </div>
+    </section>
+
+    <section class="card reservations-section" aria-labelledby="reservations-heading">
+      <div class="section-header">
+        <div>
+          <h2 id="reservations-heading">Aktywne i nadchodzące rezerwacje</h2>
+          <p class="section-desc">Zarządzaj bieżącymi rezerwacjami lub pobierz zaproszenie kalendarza.</p>
+        </div>
+        <span class="stats-pill" id="reservations-counter">0 rezerwacji</span>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="reservations-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Stanowisko / Sala</th>
+              <th>Rezerwujący</th>
+              <th>Początek</th>
+              <th>Koniec</th>
+              <th>Akcje</th>
+            </tr>
+          </thead>
+          <tbody id="reservations-tbody">
+            <tr>
+              <td colspan="6" class="empty-state">Wczytywanie listy rezerwacji...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="booking-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <span class="modal-badge" id="modal-resource-type">Biurko</span>
+          <h3 id="modal-title">Rezerwacja stanowiska</h3>
+        </div>
+        <button type="button" id="modal-close" class="icon-btn" aria-label="Zamknij okno">&times;</button>
+      </div>
+
+      <form id="booking-form" novalidate>
+        <input type="hidden" id="booking-resource-id">
+
+        <div class="modal-summary">
+          <div>
+            <span class="summary-label">Wybrany zasób</span>
+            <strong id="modal-resource-name">—</strong>
+          </div>
+          <div>
+            <span class="summary-label">Pojemność</span>
+            <strong id="modal-resource-capacity">—</strong>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="booking-user-name">Imię i nazwisko <span class="required">*</span></label>
+          <input
+            type="text"
+            id="booking-user-name"
+            name="user_name"
+            placeholder="np. Jan Kowalski"
+            minlength="3"
+            maxlength="100"
+            required
+          >
+        </div>
+
+        <div class="modal-datetime-grid">
+          <div class="form-group">
+            <label for="booking-date">Data</label>
+            <input type="date" id="booking-date" required>
+          </div>
+          <div class="form-group">
+            <label for="booking-start">Od godziny</label>
+            <input type="time" id="booking-start" step="900" required>
+          </div>
+          <div class="form-group">
+            <label for="booking-end">Do godziny</label>
+            <input type="time" id="booking-end" step="900" required>
+          </div>
+        </div>
+
+        <p id="modal-error" class="form-error hidden" role="alert"></p>
+
+        <div class="modal-footer">
+          <button type="button" id="modal-cancel" class="btn btn-outline">Anuluj</button>
+          <button type="submit" id="modal-submit" class="btn btn-primary">Potwierdź rezerwację</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
